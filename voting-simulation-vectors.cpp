@@ -8,8 +8,8 @@ using namespace std;
 
 Voter frontForWait(vector<Voter> line);
 void pushToWait(Voter voter, vector<Voter> &line);
-void popFromWait(vector<Voter> line);
-void pushToBallot(Voter voter, vector<Voter> line, int lineNumber);
+Voter popFromWait(vector<Voter> &line);
+void pushToBallot(Voter voter, vector<Voter> &line, int lineNumber);
 int popFromBallot(vector<Voter> line, int lineNumber);
 
 int main(int argc, char *argv[])
@@ -38,7 +38,27 @@ int main(int argc, char *argv[])
 	for(int i = 0; i < minutes; i++)
 	{
 		if(verbose)
+		{
+			cout << endl;
 			cout << "Minute " << i << endl;
+		}
+		if(!waitLine.empty())
+		{
+			Voter temp = popFromWait(waitLine);
+			int position = 0;
+
+			if(position < 4)
+			{
+				pushToBallot(temp, VoteQueues[position], position);
+				position++;
+			}
+			else
+			{
+				position = 0;
+				pushToBallot(temp, VoteQueues[position], position);
+				position++;
+			}
+		}
 
 		cout << "______________________" << endl;
 		normal_distribution<double> numArrival(avgPeoplePerMinute, 1);
@@ -59,6 +79,10 @@ int main(int argc, char *argv[])
 		for(int k = 0; k < waitLine.size(); k++)
 			waitLine[k].updateWait();
 
+
+
+
+
 	}
 	return 0;
 }
@@ -74,15 +98,16 @@ void pushToWait(Voter voter, vector<Voter> &line)
 	cout << voter.getName() << " has entered the wait line" << endl;
 }
 
-void popFromWait(vector<Voter> line)
+Voter popFromWait(vector<Voter> &line)
 {
 	Voter temp = frontForWait(line);
 	cout << temp.getName() << " has left the wait line" << endl;
 	line.erase(line.begin());
+	return temp;
 }
 
 
-void pushToBallot(Voter voter, vector<Voter> line, int lineNumber)
+void pushToBallot(Voter voter, vector<Voter> &line, int lineNumber)
 {
 	line.push_back(voter);
 	cout << voter.getName() << " has entered ballot queue #" << lineNumber << endl;
@@ -97,8 +122,5 @@ int popFromBallot(vector<Voter> line, int lineNumber)
 	line.erase(line.begin());
 	return grabTime;
 }
-
-
-
 
 
