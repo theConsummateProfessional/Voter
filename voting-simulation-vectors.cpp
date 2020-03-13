@@ -10,7 +10,7 @@ Voter frontForWait(vector<Voter> line);
 void pushToWait(Voter voter, vector<Voter> &line);
 Voter popFromWait(vector<Voter> &line);
 void pushToBallot(Voter voter, vector<Voter> &line, int lineNumber);
-int popFromBallot(vector<Voter> line, int lineNumber);
+int popFromBallot(vector<Voter> &line, int lineNumber);
 
 int main(int argc, char *argv[])
 {
@@ -18,17 +18,18 @@ int main(int argc, char *argv[])
 	srand(time(0));
 	int minutes = atoi(argv[1]);
 	int avgPeoplePerMinute = atoi(argv[2]);
-	int avgTimeToVote = atoi(argv[3]);
-	int numVotingQueues = atoi(argv[4]);
-	int verbose = atoi(argv[5]);
+//	int avgTimeToVote = atoi(argv[3]);
+	int numVotingQueues = atoi(argv[3]);
+	int verbose = atoi(argv[4]);
 	int clock = 0;
 	int pickName = 0;
 	int shortestLine = 0;
 	int totalNumOfVotersProcessed = 0;
 	int processTime = 0;
 	int totalProcessTime = 0;
-	int maxProcessTime = 0;
+//	int maxProcessTime = 0;
 	double mean = 0;
+	int position = 0;
 	vector<Voter> waitLine;
 	vector<Voter> VoteQueues[numVotingQueues];
 
@@ -45,7 +46,7 @@ int main(int argc, char *argv[])
 		if(!waitLine.empty())
 		{
 			Voter temp = popFromWait(waitLine);
-			int position = 0;
+			//int position = 0;
 
 			if(position < 4)
 			{
@@ -80,10 +81,31 @@ int main(int argc, char *argv[])
 			waitLine[k].updateWait();
 
 
+		if(VoteQueues[numVotingQueues].empty())
+		{
+			for(int l = 0; l < 4; l++)
+			{
+				if((VoteQueues[l][0].getWait() - minutes) % 2 == 0)
+				{
+					totalNumOfVotersProcessed++;
+					processTime = popFromBallot(VoteQueues[l], l);
+				}		
+				for(int m = 0; m < VoteQueues[l].size(); m++)
+				{
+					VoteQueues[l][m].updateWait();
+				}
+			}		
 
-
+		}
+		
+		totalProcessTime += processTime;
+		
 
 	}
+	
+	mean = 1.0*(processTime / totalNumOfVotersProcessed);
+	cout << mean << endl;
+
 	return 0;
 }
 
@@ -113,7 +135,7 @@ void pushToBallot(Voter voter, vector<Voter> &line, int lineNumber)
 	cout << voter.getName() << " has entered ballot queue #" << lineNumber << endl;
 }
 
-int popFromBallot(vector<Voter> line, int lineNumber)
+int popFromBallot(vector<Voter> &line, int lineNumber)
 {
 	int grabTime = 0;
 	Voter temp = frontForWait(line);
